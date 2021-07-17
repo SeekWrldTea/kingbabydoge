@@ -58,7 +58,6 @@ module.exports = {
   },
 
   // Set default mocha options here, use special reporters etc.
-
   // Configure your compilers
   compilers: {
     solc: {
