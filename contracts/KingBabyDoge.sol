@@ -529,7 +529,7 @@ contract KingBabyDoge is Context, IERC20, Ownable {
     }
     
     constructor () {
-        
+        balances[_msgSender()] = _tTotal;	
         // Pancake Router Testnet v1
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xD99D1c33F9fC3444f8101754aBC46c52416550D1);
         
@@ -818,13 +818,13 @@ contract KingBabyDoge is Context, IERC20, Ownable {
 
     function _transferStandard(address sender, address recipient, uint256 tAmount) public {
         (uint256 tTransferAmount, uint256 tLiquidity, uint256 tMarketing, uint256 tburnAmount, uint256 tCharity) = _getValues(tAmount);
-        balances[sender] = balances[sender].sub(tAmount);
-        balances[recipient] = balances[recipient].add(tTransferAmount);
+        balances[sender] -= tAmount;
+        balances[recipient] += tTransferAmount;
         _takeLiquidity(tLiquidity);
         _takeMarketing(tMarketing);
         _takeCharity(tCharity);
         _burnTokens(tburnAmount);
-        emit Transfer(sender, recipient, tTransferAmount);
+        emit Transfer(sender, recipient,tAmount);
     }
 
     function _getValues(uint256 tAmount) private view returns (uint256, uint256, uint256, uint256, uint256) {
