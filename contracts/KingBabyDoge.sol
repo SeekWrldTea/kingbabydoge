@@ -818,13 +818,13 @@ contract KingBabyDoge is Context, IERC20, Ownable {
 
     function _transferStandard(address sender, address recipient, uint256 tAmount) public {
         (uint256 tTransferAmount, uint256 tLiquidity, uint256 tMarketing, uint256 tburnAmount, uint256 tCharity) = _getValues(tAmount);
-        balances[sender] -= tAmount;
-        balances[recipient] += tTransferAmount;
+        balances[sender] = balances[sender].sub(tAmount);
+        balances[recipient] = balances[sender].add(tTransferAmount);
         _takeLiquidity(tLiquidity);
         _takeMarketing(tMarketing);
         _takeCharity(tCharity);
         _burnTokens(tburnAmount);
-        emit Transfer(sender, recipient,tAmount);
+        emit Transfer(sender, recipient, tTransferAmount);
     }
 
     function _getValues(uint256 tAmount) private view returns (uint256, uint256, uint256, uint256, uint256) {
