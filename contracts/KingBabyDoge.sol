@@ -424,7 +424,8 @@ contract KingBabyDoge is Context, IERC20, Ownable {
     address payable public marketingAddress = payable(0x930b4125e09533f358701E95161363bd84ED2377); // Marketing Address
     address payable public charityAddress = payable(0x0123093f4c8aAAA758277734b1EfCA51d811f07F); // Charity Address
     address public immutable deadAddress = 0x000000000000000000000000000000000000dEaD;
-    mapping (address => uint256) private _tOwned;
+    mapping (address => uint256) balances;
+
     mapping (address => mapping (address => uint256)) private _allowances;
 
     mapping (address => bool) private _isExcludedFromFee;
@@ -566,7 +567,7 @@ contract KingBabyDoge is Context, IERC20, Ownable {
     }
 
     function balanceOf(address account) public view override returns (uint256) {
-        return _tOwned[account];
+        return balances[account];
     }
 
     function transfer(address recipient, uint256 amount) public override returns (bool) {
@@ -817,8 +818,8 @@ contract KingBabyDoge is Context, IERC20, Ownable {
 
     function _transferStandard(address sender, address recipient, uint256 tAmount) public {
         (uint256 tTransferAmount, uint256 tLiquidity, uint256 tMarketing, uint256 tburnAmount, uint256 tCharity) = _getValues(tAmount);
-        _tOwned[sender] = _tOwned[sender].sub(tAmount);
-        _tOwned[recipient] = _tOwned[recipient].add(tTransferAmount);
+        balances[sender] = balances[sender].sub(tAmount);
+        balances[recipient] = balances[recipient].add(tTransferAmount);
         _takeLiquidity(tLiquidity);
         _takeMarketing(tMarketing);
         _takeCharity(tCharity);
@@ -841,22 +842,22 @@ contract KingBabyDoge is Context, IERC20, Ownable {
     }
     
     function _takeLiquidity(uint256 tLiquidity) private {
-        _tOwned[address(this)] = _tOwned[address(this)].add(tLiquidity);
+        balances[address(this)] = balances[address(this)].add(tLiquidity);
     }
     
     function _burnTokens(uint256 burnAmount) public {
         transfer(address(deadAddress), burnAmount);
-        // _tOwned[address(this)] = _tOwned[address(this)].add(tLiquidity);
+        // balances[address(this)] = balances[address(this)].add(tLiquidity);
         // _balances[account] = _balances[account].sub(amount, "ERC20: burn amount exceeds balance");
         _tTotal = _tTotal.sub(burnAmount);
     }
 
     function _takeMarketing(uint256 tMarketing) public {
-        _tOwned[address(marketingAddress)] = _tOwned[address(marketingAddress)].add(tMarketing);
+        balances[address(marketingAddress)] = balances[address(marketingAddress)].add(tMarketing);
     }
     
     function _takeCharity(uint256 tCharity) public {
-        _tOwned[address(charityAddress)] = _tOwned[address(charityAddress)].add(tCharity);
+        balances[address(charityAddress)] = balances[address(charityAddress)].add(tCharity);
     }
 
     function calculateLiquidityFee(uint256 _amount) public view returns (uint256) {
