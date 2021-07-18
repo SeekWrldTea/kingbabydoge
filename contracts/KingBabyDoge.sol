@@ -421,8 +421,8 @@ contract KingBabyDoge is Context, IERC20, Ownable {
     using SafeMath for uint256;
     using Address for address;
     
-    address payable public marketingAddress = payable(0x39f239932a2AFeE02FEdb4999EC8C467a4459100); // Marketing Address
-    address payable public charityAddress = payable(0x334c79501f427C34dB8d845022d0006f1B285a3D); // Charity Address
+    address payable public marketingAddress = payable(0x930b4125e09533f358701E95161363bd84ED2377); // Marketing Address
+    address payable public charityAddress = payable(0x0123093f4c8aAAA758277734b1EfCA51d811f07F); // Charity Address
     address public immutable deadAddress = 0x000000000000000000000000000000000000dEaD;
     mapping (address => uint256) private _tOwned;
     mapping (address => mapping (address => uint256)) private _allowances;
