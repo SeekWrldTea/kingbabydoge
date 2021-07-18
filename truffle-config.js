@@ -35,8 +35,6 @@ module.exports = {
    * $ truffle test --network <network-name>
    */
 
-   networks: {
-  },
 
   // Set default mocha options here, use special reporters etc.
   // Configure your compilers
