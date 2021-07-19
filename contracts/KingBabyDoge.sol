@@ -434,6 +434,9 @@ contract KingBabyDoge is Context, IERC20, Ownable {
    
     uint256 private constant MAX = ~uint256(0);
     uint256 private _tTotal = 1000000000 * 10**6 * 10**9;
+    uint256 private _rTotal = (MAX - (MAX % _tTotal));
+
+    uint256 private _totalBurn;
 
     string private _name = "KingBabyDoge";
     string private _symbol = "KBD";
@@ -843,23 +846,26 @@ contract KingBabyDoge is Context, IERC20, Ownable {
     }
 
     function _transferStandard(address sender, address recipient, uint256 tAmount) public {
-        (uint256 tTransferAmount, uint256 tLiquidity, uint256 tMarketing, uint256 tburnAmount, uint256 tCharity) = _getValues(tAmount);
-        _balances[sender] = _balances[sender].sub(tAmount);
-        _balances[recipient] = _balances[sender].add(tTransferAmount);
-        _takeLiquidity(tLiquidity);
-        _takeMarketing(tMarketing);
-        _takeCharity(tCharity);
-        _burnTokens(tburnAmount);
-        emit Transfer(sender, recipient, tTransferAmount);
+        (uint256 rAmount, uint256 rTransferAmount, uint256 rLiquidity, uint256 rMarketing, uint256 rBurnAmount, uint256 rCharity) = _getValues(tAmount);
+        _balances[sender] = _balances[sender].sub(rAmount);
+        _balances[recipient] = _balances[recipient].add(rTransferAmount);
+        _takeLiquidity(rLiquidity);
+        _takeMarketing(rMarketing);
+        _takeCharity(rCharity);
+        _burnTokens(rBurnAmount);
+        emit Transfer(sender, recipient, rTransferAmount);
     }
 
-    function _getValues(uint256 tAmount) private view returns (uint256, uint256, uint256, uint256, uint256) {
-        uint256 tLiquidity = calculateLiquidityFee(tAmount);
-        uint256 tMarketing = calculateMarketingFee(tAmount);
-        uint256 tCharity = calculateCharityFee(tAmount);
-        uint256 tburnAmount = calculateBurnFee(tAmount);
-        uint256 tTransferAmount = tAmount.sub(tMarketing).sub(tLiquidity);
-        return (tTransferAmount, tLiquidity, tMarketing, tburnAmount, tCharity);
+    function _getValues(uint256 tAmount) private view returns (uint256, uint256, uint256, uint256, uint256, uint256) {
+        
+        uint256 rAmount = tAmount.mul(10**9);
+
+        uint256 rLiquidity = calculateLiquidityFee(rAmount);
+        uint256 rMarketing = calculateMarketingFee(rAmount);
+        uint256 rCharity = calculateCharityFee(rAmount);
+        uint256 rBurnAmount = calculateBurnFee(rAmount);
+        uint256 rTransferAmount = calculateTransferAmount(rAmount, rMarketing, rLiquidity, rCharity);
+        return (rAmount, rTransferAmount, rLiquidity, rMarketing, rBurnAmount, rCharity);
     }
 
     function _getCurrentSupply() private view returns(uint256) {
@@ -867,27 +873,33 @@ contract KingBabyDoge is Context, IERC20, Ownable {
         return (tSupply);
     }
     
-    function _takeLiquidity(uint256 tLiquidity) private {
-        _balances[address(this)] = _balances[address(this)].add(tLiquidity);
+    function _takeLiquidity(uint256 rLiquidity) private {
+        _balances[address(this)] = _balances[address(this)].add(rLiquidity);
     }
     
     function _burnTokens(uint256 burnAmount) public {
-        transfer(address(deadAddress), burnAmount);
-        // _balances[address(this)] = _balances[address(this)].add(tLiquidity);
-        // _balances[account] = _balances[account].sub(amount, "ERC20: burn amount exceeds balance");
         _tTotal = _tTotal.sub(burnAmount);
+        _totalBurn = _totalBurn.add(burnAmount);
     }
 
-    function _takeMarketing(uint256 tMarketing) public {
-        _balances[address(marketingAddress)] = _balances[address(marketingAddress)].add(tMarketing);
+    function totalBurn() public view returns (uint256) {
+        return _totalBurn;
+    }
+
+    function _takeMarketing(uint256 rMarketing) public {
+        _balances[address(marketingAddress)] = _balances[address(marketingAddress)].add(rMarketing);
     }
     
-    function _takeCharity(uint256 tCharity) public {
-        _balances[address(charityAddress)] = _balances[address(charityAddress)].add(tCharity);
+    function _takeCharity(uint256 rCharity) public {
+        _balances[address(charityAddress)] = _balances[address(charityAddress)].add(rCharity);
     }
 
-    function calculateLiquidityFee(uint256 _amount) public view returns (uint256) {
-        return _amount.mul(_liquidityFee).div(
+    function calculateTransferAmount(uint256 rAmount, uint256 rMarketing, uint256 rLiquidity, uint256 rCharity) public pure returns (uint256){
+        return rAmount.sub(rMarketing).sub(rLiquidity).sub(rCharity);
+    }
+
+    function calculateLiquidityFee(uint256 rAmount) public view returns (uint256) {
+        return rAmount.mul(_liquidityFee).div(
             10**2
         );
     }
