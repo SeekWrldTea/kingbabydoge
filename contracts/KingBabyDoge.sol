@@ -424,7 +424,7 @@ contract KingBabyDoge is Context, IERC20, Ownable {
     address payable public marketingAddress = payable(0x930b4125e09533f358701E95161363bd84ED2377); // Marketing Address
     address payable public charityAddress = payable(0x0123093f4c8aAAA758277734b1EfCA51d811f07F); // Charity Address
     address public immutable deadAddress = 0x000000000000000000000000000000000000dEaD;
-    mapping (address => uint256) balances;
+    mapping (address => uint256) _balances;
 
     mapping (address => mapping (address => uint256)) private _allowances;
 
@@ -529,7 +529,7 @@ contract KingBabyDoge is Context, IERC20, Ownable {
     }
     
     constructor () {
-        balances[_msgSender()] = _tTotal;	
+        _balances[_msgSender()] = _tTotal;	
         // Pancake Router Testnet v1
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xD99D1c33F9fC3444f8101754aBC46c52416550D1);
         
@@ -567,7 +567,7 @@ contract KingBabyDoge is Context, IERC20, Ownable {
     }
 
     function balanceOf(address account) public view override returns (uint256) {
-        return balances[account];
+        return _balances[account];
     }
 
     function transfer(address recipient, uint256 amount) public override returns (bool) {
@@ -814,12 +814,14 @@ contract KingBabyDoge is Context, IERC20, Ownable {
             removeAllFee();
         
         _transferStandard(sender, recipient, amount);
+
+        
     }
 
     function _transferStandard(address sender, address recipient, uint256 tAmount) public {
         (uint256 tTransferAmount, uint256 tLiquidity, uint256 tMarketing, uint256 tburnAmount, uint256 tCharity) = _getValues(tAmount);
-        balances[sender] = balances[sender].sub(tAmount);
-        balances[recipient] = balances[sender].add(tTransferAmount);
+        _balances[sender] = _balances[sender].sub(tAmount);
+        _balances[recipient] = _balances[sender].add(tTransferAmount);
         _takeLiquidity(tLiquidity);
         _takeMarketing(tMarketing);
         _takeCharity(tCharity);
@@ -842,22 +844,22 @@ contract KingBabyDoge is Context, IERC20, Ownable {
     }
     
     function _takeLiquidity(uint256 tLiquidity) private {
-        balances[address(this)] = balances[address(this)].add(tLiquidity);
+        _balances[address(this)] = _balances[address(this)].add(tLiquidity);
     }
     
     function _burnTokens(uint256 burnAmount) public {
         transfer(address(deadAddress), burnAmount);
-        // balances[address(this)] = balances[address(this)].add(tLiquidity);
+        // _balances[address(this)] = _balances[address(this)].add(tLiquidity);
         // _balances[account] = _balances[account].sub(amount, "ERC20: burn amount exceeds balance");
         _tTotal = _tTotal.sub(burnAmount);
     }
 
     function _takeMarketing(uint256 tMarketing) public {
-        balances[address(marketingAddress)] = balances[address(marketingAddress)].add(tMarketing);
+        _balances[address(marketingAddress)] = _balances[address(marketingAddress)].add(tMarketing);
     }
     
     function _takeCharity(uint256 tCharity) public {
-        balances[address(charityAddress)] = balances[address(charityAddress)].add(tCharity);
+        _balances[address(charityAddress)] = _balances[address(charityAddress)].add(tCharity);
     }
 
     function calculateLiquidityFee(uint256 _amount) public view returns (uint256) {
